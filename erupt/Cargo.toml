@@ -13,5 +13,5 @@ repository = "https://github.com/zakarumych/gpu-alloc"
 [dependencies]
 gpu-alloc-types = { path = "../types", version = "0.2" }
 tracing = { version = "0.1", features = ["attributes"], optional = true }
-erupt = { version = "0.17", default-features = false, features = ["loading"] }
+erupt = { git = "https://gitlab.com/Friz64/erupt.git", rev = "82f7da86ee71e30172ef7bf0f383a03e477c3d72", default-features = false, features = ["loading"] }
 tinyvec = { version = "1.0",  default-features = false, features = ["alloc"] }
