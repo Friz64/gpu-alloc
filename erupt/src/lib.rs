@@ -80,7 +80,7 @@
 //!
 
 use {
-    erupt::{vk1_0, vk1_1, DeviceLoader, ExtendableFrom as _, InstanceLoader},
+    erupt::{vk1_0, vk1_1, DeviceLoader, ExtendableFromConst, InstanceLoader},
     gpu_alloc_types::{
         AllocationFlags, DeviceMapError, DeviceProperties, MappedMemoryRange, MemoryDevice,
         MemoryHeap, MemoryPropertyFlags, MemoryType, OutOfMemory,
@@ -118,15 +118,14 @@ impl MemoryDevice<vk1_0::DeviceMemory> for EruptMemoryDevice {
             .allocation_size(size)
             .memory_type_index(memory_type);
 
-        let mut info_flags;
-
+        let info_flags;
         if flags.contains(AllocationFlags::DEVICE_ADDRESS) {
             info_flags = vk1_1::MemoryAllocateFlagsInfoBuilder::new()
                 .flags(vk1_1::MemoryAllocateFlags::DEVICE_ADDRESS);
-            info = info.extend_from(&mut info_flags);
+            info = info.extend_from(&info_flags);
         }
 
-        match self.device.allocate_memory(&info, None, None).result() {
+        match self.device.allocate_memory(&info, None).result() {
             Ok(memory) => Ok(memory),
             Err(vk1_0::Result::ERROR_OUT_OF_DEVICE_MEMORY) => Err(OutOfMemory::OutOfDeviceMemory),
             Err(vk1_0::Result::ERROR_OUT_OF_HOST_MEMORY) => Err(OutOfMemory::OutOfHostMemory),
@@ -240,16 +239,16 @@ pub unsafe fn device_properties(
         erupt::{
             extensions::khr_buffer_device_address::KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
             vk1_1::PhysicalDeviceFeatures2, vk1_2::PhysicalDeviceBufferDeviceAddressFeatures,
-            ExtendableFrom as _,
+            ExtendableFromMut,
         },
         std::ffi::CStr,
     };
 
     let limits = instance
-        .get_physical_device_properties(physical_device, None)
+        .get_physical_device_properties(physical_device)
         .limits;
 
-    let memory_properties = instance.get_physical_device_memory_properties(physical_device, None);
+    let memory_properties = instance.get_physical_device_memory_properties(physical_device);
 
     let buffer_device_address =
         if instance.enabled().vk1_1 || instance.enabled().khr_get_display_properties2 {
